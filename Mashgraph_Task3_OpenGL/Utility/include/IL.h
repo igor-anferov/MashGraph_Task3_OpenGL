@@ -12,7 +12,7 @@ void IL_init() {
     ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
     
     ilEnable(IL_FORMAT_SET);
-    ilSetInteger(IL_FORMAT_MODE,IL_RGBA);
+    ilSetInteger(IL_FORMAT_MODE,IL_RGB);
     
     ilEnable(IL_TYPE_SET);
     ilSetInteger(IL_TYPE_MODE,IL_UNSIGNED_BYTE);

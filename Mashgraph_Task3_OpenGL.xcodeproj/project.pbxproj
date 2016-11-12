@@ -43,6 +43,7 @@
 		787384381DD7D09D00ACCA73 /* libILU.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libILU.a; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILU.a; sourceTree = "<group>"; };
 		787384391DD7D09D00ACCA73 /* libILUT.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libILUT.a; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILUT.a; sourceTree = "<group>"; };
 		7873843D1DD7D0D800ACCA73 /* IL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IL.h; sourceTree = "<group>"; };
+		7873843E1DD7D77200ACCA73 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = Mashgraph_Task3_OpenGL/bin/shaders; sourceTree = "<group>"; };
 		78A4487A1DD724840006C95E /* Camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
 		78A4487B1DD724840006C95E /* GL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GL.h; sourceTree = "<group>"; };
 		78A4487C1DD724840006C95E /* mat4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mat4.h; sourceTree = "<group>"; };
@@ -109,6 +110,7 @@
 		78F04C761DD641F40059C321 = {
 			isa = PBXGroup;
 			children = (
+				7873843E1DD7D77200ACCA73 /* shaders */,
 				787384361DD7CFCE00ACCA73 /* DevIL_Mac */,
 				78A448791DD724600006C95E /* Headers */,
 				78F04C811DD641F40059C321 /* Mashgraph_Task3_OpenGL */,
