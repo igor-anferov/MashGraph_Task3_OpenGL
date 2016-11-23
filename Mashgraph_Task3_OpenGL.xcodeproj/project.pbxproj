@@ -322,12 +322,15 @@
 		78F04C871DD641F40059C321 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DYLIB_INSTALL_NAME_BASE = "$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib";
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple\\ OpenGL\\ Image\\ Library/lib",
-					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/SOIL/lib",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-openmp",
+					"$(OTHER_CFLAGS)",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = build;
@@ -337,12 +340,15 @@
 		78F04C881DD641F40059C321 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DYLIB_INSTALL_NAME_BASE = "$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib";
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple\\ OpenGL\\ Image\\ Library/lib",
-					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/SOIL/lib",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-openmp",
+					"$(OTHER_CFLAGS)",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = build;

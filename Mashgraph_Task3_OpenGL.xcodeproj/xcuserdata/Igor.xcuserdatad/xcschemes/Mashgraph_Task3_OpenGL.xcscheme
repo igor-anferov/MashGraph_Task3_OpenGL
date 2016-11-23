@@ -47,7 +47,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Users/Igor/Documents/C/Mashgraph/Task3_OpenGL/Mashgraph_Task3_OpenGL/Mashgraph_Task3_OpenGL/bin"
+      customWorkingDirectory = "$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/bin"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
@@ -62,6 +62,13 @@
             ReferencedContainer = "container:Mashgraph_Task3_OpenGL.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "OMP_NUM_THREADS"
+            value = "8"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
       <LocationScenarioReference
