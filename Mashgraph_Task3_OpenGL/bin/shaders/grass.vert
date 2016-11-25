@@ -3,17 +3,20 @@
 in vec4 point;
 in vec3 position;
 in float rotationAngle;
-in float tiltAngle;
 in float size;
 in vec2 randomTiltAngle;
 out vec2 points;
 out vec3 norm;
 out vec3 point_world;
+
 uniform mat4 camera;
+uniform float time;
 
 void main() {
+    float M_PI = 3.1415926535897932384626433832795;
     norm = vec3(0, 0, 1);
-    float a = tiltAngle * (point.y)*(point.y);
+    float trueTiltAngle = (sin(-10 * position.x + time)+1)/2*(M_PI/12);
+    float a = trueTiltAngle * (point.y)*(point.y);
     mat4 tiltMatrix       = mat4( cos(a), -sin(a), 0, 0,
                                   sin(a),  cos(a), 0, 0,
                                   0,       0,      1, 0,
