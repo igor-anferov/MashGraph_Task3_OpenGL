@@ -3,11 +3,341 @@
 #include <ctime>
 #include <sys/time.h>
 #include <random>
+#include <sstream>
 
 #include "Utility.h"
 #include "Texture.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 using namespace std;
+
+class Shader {
+public:
+    GLuint Program;
+    Shader(){};
+    // Constructor generates the shader on the fly
+    Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
+        // 1. Retrieve the vertex/fragment source code from filePath
+        std::string vertexCode;
+        std::string fragmentCode;
+        std::ifstream vShaderFile;
+        std::ifstream fShaderFile;
+        // ensures ifstream objects can throw exceptions:
+        vShaderFile.exceptions (std::ifstream::badbit);
+        fShaderFile.exceptions (std::ifstream::badbit);
+        try {
+            // Open files
+            vShaderFile.open(vertexPath);
+            fShaderFile.open(fragmentPath);
+            std::stringstream vShaderStream, fShaderStream;
+            // Read file's buffer contents into streams
+            vShaderStream << vShaderFile.rdbuf();
+            fShaderStream << fShaderFile.rdbuf();
+            // close file handlers
+            vShaderFile.close();
+            fShaderFile.close();
+            // Convert stream into string
+            vertexCode = vShaderStream.str();
+            fragmentCode = fShaderStream.str();
+        }
+        catch (std::ifstream::failure e) {
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        }
+        const GLchar* vShaderCode = vertexCode.c_str();
+        const GLchar * fShaderCode = fragmentCode.c_str();
+        // 2. Compile shaders
+        GLuint vertex, fragment;
+        GLint success;
+        GLchar infoLog[512];
+        // Vertex Shader
+        vertex = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertex, 1, &vShaderCode, NULL);
+        glCompileShader(vertex);
+        // Print compile errors if any
+        glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        }
+        // Fragment Shader
+        fragment = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glCompileShader(fragment);
+        // Print compile errors if any
+        glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(fragment, 512, NULL, infoLog);
+            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+        }
+        // Shader Program
+        this->Program = glCreateProgram();
+        glAttachShader(this->Program, vertex);
+        glAttachShader(this->Program, fragment);
+        glLinkProgram(this->Program);
+        // Print linking errors if any
+        glGetProgramiv(this->Program, GL_LINK_STATUS, &success);
+        if (!success) {
+            glGetProgramInfoLog(this->Program, 512, NULL, infoLog);
+            std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        }
+        // Delete the shaders as they're linked into our program now and no longer necessery
+        glDeleteShader(vertex);
+        glDeleteShader(fragment);
+        
+    }
+    // Uses the current shader
+    void Use() {
+        glUseProgram(this->Program);
+    }
+};
+
+
+struct Vertex {
+    VM::vec3 Position;
+    VM::vec3 Normal;
+    VM::vec2 TexCoords;
+};
+
+struct Texture {
+    GLuint id;
+    string type;
+    aiString path; // We store the path of the texture to compare with other textures
+};
+
+class Mesh {
+public:
+    /* Mesh Data */
+    vector<Vertex> vertices;
+    vector<GLuint> indices;
+    vector<Texture> textures;
+    /* Functions */
+    Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures) {
+        this->vertices = vertices;
+        this->indices = indices;
+        this->textures = textures;
+        this->setupMesh();
+    };
+    void Draw(Shader shader) {
+        GLuint diffuseNr = 1;
+        GLuint specularNr = 1;
+        for(GLuint i = 0; i < this->textures.size(); i++) {
+            glActiveTexture(GL_TEXTURE0 + i); // Activate proper texture unit before binding
+            // Retrieve texture number (the N in diffuse_textureN)
+            stringstream ss;
+            string number;
+            string name = this->textures[i].type;
+            if(name == "texture_diffuse")
+                ss << diffuseNr++; // Transfer GLuint to stream
+            else if(name == "texture_specular")
+                ss << specularNr++; // Transfer GLuint to stream
+            number = ss.str();
+            glUniform1f(glGetUniformLocation(shader.Program, ("material." + name + number).c_str()), i);
+            glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+        }
+        glActiveTexture(GL_TEXTURE0);
+        // Draw mesh
+        glBindVertexArray(this->VAO);
+        glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    };
+private:
+    /* Render data */
+    GLuint VAO, VBO, EBO;
+    /* Functions    */
+    void setupMesh() {
+        glGenVertexArrays(1, &this->VAO);
+        glGenBuffers(1, &this->VBO);
+        glGenBuffers(1, &this->EBO);
+        glBindVertexArray(this->VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+        glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), &this->vertices[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint), &this->indices[0], GL_STATIC_DRAW);
+        // Vertex Positions
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+        // Vertex Normals
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
+        // Vertex Texture Coords
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
+        glBindVertexArray(0);
+    };
+};
+
+GLint TextureFromFile(const char* path, string directory) {
+    //Generate texture ID and load texture data
+    string filename = string(path);
+    filename = directory + '/' + filename;
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    int width,height;
+    unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+    // Assign texture to ID
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    
+    // Parameters
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    SOIL_free_image_data(image);
+    return textureID;
+}
+
+class Model {
+public:
+    /*  Functions   */
+    // Constructor, expects a filepath to a 3D model.
+    Model(){};
+    Model(GLchar* path) {
+        this->loadModel(path);
+    }
+    
+    // Draws the model, and thus all its meshes
+    void Draw(Shader shader) {
+        for(GLuint i = 0; i < this->meshes.size(); i++)
+            this->meshes[i].Draw(shader);
+    }
+    
+private:
+    /*  Model Data  */
+    vector<Mesh> meshes;
+    string directory;
+    vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    
+    /*  Functions   */
+    // Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
+    void loadModel(string path) {
+        // Read file via ASSIMP
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+        // Check for errors
+        if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { // if is Not Zero
+            cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
+            return;
+        }
+        // Retrieve the directory path of the filepath
+        this->directory = path.substr(0, path.find_last_of('/'));
+        
+        // Process ASSIMP's root node recursively
+        this->processNode(scene->mRootNode, scene);
+    }
+    
+    // Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
+    void processNode(aiNode* node, const aiScene* scene) {
+        // Process each mesh located at the current node
+        for(GLuint i = 0; i < node->mNumMeshes; i++) {
+            // The node object only contains indices to index the actual objects in the scene.
+            // The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
+            aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+            this->meshes.push_back(this->processMesh(mesh, scene));
+        }
+        // After we've processed all of the meshes (if any) we then recursively process each of the children nodes
+        for(GLuint i = 0; i < node->mNumChildren; i++) {
+            this->processNode(node->mChildren[i], scene);
+        }
+        
+    }
+    
+    Mesh processMesh(aiMesh* mesh, const aiScene* scene) {
+        // Data to fill
+        vector<Vertex> vertices;
+        vector<GLuint> indices;
+        vector<Texture> textures;
+        
+        // Walk through each of the mesh's vertices
+        for(GLuint i = 0; i < mesh->mNumVertices; i++) {
+            Vertex vertex;
+            VM::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to VM's vec3 class so we transfer the data to this placeholder VM::vec3 first.
+            // Positions
+            vector.x = mesh->mVertices[i].x;
+            vector.y = mesh->mVertices[i].y;
+            vector.z = mesh->mVertices[i].z;
+            vertex.Position = vector;
+            // Normals
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
+            vertex.Normal = vector;
+            // Texture Coordinates
+            if(mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
+            {
+                VM::vec2 vec;
+                // A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
+                // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+                vec.x = mesh->mTextureCoords[0][i].x;
+                vec.y = mesh->mTextureCoords[0][i].y;
+                vertex.TexCoords = vec;
+            }
+            else
+                vertex.TexCoords = VM::vec2(0.0f, 0.0f);
+            vertices.push_back(vertex);
+        }
+        // Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+        for(GLuint i = 0; i < mesh->mNumFaces; i++) {
+            aiFace face = mesh->mFaces[i];
+            // Retrieve all indices of the face and store them in the indices vector
+            for(GLuint j = 0; j < face.mNumIndices; j++)
+                indices.push_back(face.mIndices[j]);
+        }
+        // Process materials
+        if(mesh->mMaterialIndex >= 0) {
+            aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+            // We assume a convention for sampler names in the shaders. Each diffuse texture should be named
+            // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
+            // Same applies to other texture as the following list summarizes:
+            // Diffuse: texture_diffuseN
+            // Specular: texture_specularN
+            // Normal: texture_normalN
+            
+            // 1. Diffuse maps
+            vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+            textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+            // 2. Specular maps
+            vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+            textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        }
+        
+        // Return a mesh object created from the extracted mesh data
+        return Mesh(vertices, indices, textures);
+    }
+    
+    // Checks all material textures of a given type and loads the textures if they're not loaded yet.
+    // The required info is returned as a Texture struct.
+    vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {
+        vector<Texture> textures;
+        for(GLuint i = 0; i < mat->GetTextureCount(type); i++) {
+            aiString str;
+            mat->GetTexture(type, i, &str);
+            // Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
+            GLboolean skip = false;
+            for(GLuint j = 0; j < textures_loaded.size(); j++) {
+                if(textures_loaded[j].path == str)
+                {
+                    textures.push_back(textures_loaded[j]);
+                    skip = true; // A texture with the same filepath has already been loaded, continue to next one. (optimization)
+                    break;
+                }
+            }
+            if(!skip) {   // If texture hasn't been loaded already, load it
+                Texture texture;
+                texture.id = TextureFromFile(str.C_Str(), this->directory);
+                texture.type = typeName;
+                texture.path = str;
+                textures.push_back(texture);
+                this->textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+            }
+        }
+        return textures;
+    }
+};
 
 double mod(double x, double y) {
     int sign = 1;
@@ -26,7 +356,9 @@ const uint TITLE_MAP_SIDE = 50;
 GL::Camera camera;               // Мы предоставляем Вам реализацию камеры. В OpenGL камера - это просто 2 матрицы. Модельно-видовая матрица и матрица проекции. // ###
                                  // Задача этого класса только в том чтобы обработать ввод с клавиатуры и правильно сформировать эти матрицы.
                                  // Вы можете просто пользоваться этим классом для расчёта указанных матриц.
-
+VM::vec3 light_source(0.5,1,0.5);
+Shader shader;
+Model our_model;
 
 GLuint grassPointsCount; // Количество вершин у модели травинки
 GLuint grassShader;      // Шейдер, рисующий траву
@@ -68,6 +400,15 @@ void DrawGround() {
     GLint cameraLocation = glGetUniformLocation(groundShader, "camera");         CHECK_GL_ERRORS
     // Устанавливаем юниформ (загружаем на GPU матрицу проекции?)
     glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
+    // Находим локацию юниформа 'cameraPos' в шейдере
+    GLint cameraPosLocation = glGetUniformLocation(groundShader, "cameraPos");         CHECK_GL_ERRORS
+    // Устанавливаем юниформ
+    glUniform3fv(cameraPosLocation, 1, (GLfloat *)&(camera.position)); CHECK_GL_ERRORS
+    // Подключаем текстуру
+    // Находим локацию юниформа 'source_coord' в шейдере
+    GLint source_coordLocation = glGetUniformLocation(groundShader, "source_coord");         CHECK_GL_ERRORS
+    // Устанавливаем юниформ
+    glUniform3fv(source_coordLocation, 1, (GLfloat *)&light_source); CHECK_GL_ERRORS
     // Подключаем текстуру
     glBindTexture(GL_TEXTURE_2D, texture);
     // Подключаем VAO, который содержит буферы, необходимые для отрисовки земли
@@ -175,6 +516,11 @@ void DrawGrass() {
     glUseProgram(grassShader);                                                   CHECK_GL_ERRORS
     GLint cameraLocation = glGetUniformLocation(grassShader, "camera");          CHECK_GL_ERRORS
     glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
+    GLint source_coordLocation = glGetUniformLocation(grassShader, "source_coord");         CHECK_GL_ERRORS
+    glUniform3fv(source_coordLocation, 1, (GLfloat *)&light_source); CHECK_GL_ERRORS
+    GLint cameraPosLocation = glGetUniformLocation(grassShader, "cameraPos");         CHECK_GL_ERRORS
+    glUniform3fv(cameraPosLocation, 1, (GLfloat *)&(camera.position)); CHECK_GL_ERRORS
+
     // Подключаем текстуру
     glBindTexture(GL_TEXTURE_2D, grassTexture);
     glBindVertexArray(grassVAO);                                                 CHECK_GL_ERRORS
@@ -185,6 +531,13 @@ void DrawGrass() {
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, grassPointsCount, GRASS_INSTANCES);   CHECK_GL_ERRORS
     glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     glUseProgram(0);                                                             CHECK_GL_ERRORS
+}
+
+void DrawModel() {
+    shader.Use();   // <-- Don't forget this one!
+    GLint cameraLocation = glGetUniformLocation(shader.Program, "camera");          CHECK_GL_ERRORS
+    glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
+    our_model.Draw(shader);
 }
 
 // Эта функция вызывается для обновления экрана
@@ -198,6 +551,8 @@ void RenderLayouts() {
     // Рисуем меши
     DrawGround();
     DrawGrass();
+    DrawModel();
+
     glutSwapBuffers();
 }
 
@@ -384,6 +739,10 @@ void CreateGrass() {
         longTilting[i].y = float(rand()) / RAND_MAX * (M_PI/12) + (M_PI/24);
     }
 
+    int width, height;
+    unsigned char* image = SOIL_load_image("container.jpg", &width, &height, 0,
+                                           SOIL_LOAD_RGB);
+    
     ILuint	id;
     ilEnable(IL_FORMAT_SET);
     ilSetInteger(IL_FORMAT_MODE,IL_RGBA);
@@ -503,17 +862,56 @@ void CreateCamera() {
     camera.znear = 0.05f;
 }
 
+vector <VM::vec3> meshPoints;
+vector <VM::vec3> normls;
+
 // Создаём меш земли
-vector <VM::vec3> GenGroundMesh() {
-    vector <VM::vec3> mesh;
+void GenGroundMesh() {
+    size_t size;
+    VM::vec3 tmp;
     for (int i=0; i<GROUND_SIDE-1; i++) {
-        if (i!=0) mesh.pop_back();
+        if (i!=0) {
+            meshPoints.pop_back();
+            normls.pop_back();
+        }
         for (int j=(i%2==0 ? 0 : GROUND_SIDE-1); (i%2==0 ? j<GROUND_SIDE : j>=0); j+=(i%2==0 ? 1 : -1)) {
-            mesh.push_back(VM::vec3(GLfloat(i  ) / GROUND_SIDE, altitudeMap[i  ][j]*0.1, GLfloat(j) / GROUND_SIDE));
-            mesh.push_back(VM::vec3(GLfloat(i+1) / GROUND_SIDE, altitudeMap[i+1][j]*0.1, GLfloat(j) / GROUND_SIDE));
+            meshPoints.push_back(VM::vec3(GLfloat(i  ) / GROUND_SIDE, altitudeMap[i  ][j]*0.1, GLfloat(j) / GROUND_SIDE));
+            if (meshPoints.size() == 3) {
+                tmp = normalize(cross(meshPoints[0]-meshPoints[1], meshPoints[0]-meshPoints[2]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+                tmp = normalize(cross(meshPoints[0]-meshPoints[1], meshPoints[0]-meshPoints[2]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+                tmp = normalize(cross(meshPoints[0]-meshPoints[1], meshPoints[0]-meshPoints[2]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+
+            } else if ((size = meshPoints.size()) > 3) {
+                tmp = normalize(cross(meshPoints[size-3]-meshPoints[size-2], meshPoints[size-3]-meshPoints[size-1]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+            }
+            
+            meshPoints.push_back(VM::vec3(GLfloat(i+1) / GROUND_SIDE, altitudeMap[i+1][j]*0.1, GLfloat(j) / GROUND_SIDE));
+            if (meshPoints.size() == 3) {
+                tmp = normalize(cross(meshPoints[0]-meshPoints[1], meshPoints[0]-meshPoints[2]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+                tmp = normalize(cross(meshPoints[0]-meshPoints[1], meshPoints[0]-meshPoints[2]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+                tmp = normalize(cross(meshPoints[0]-meshPoints[1], meshPoints[0]-meshPoints[2]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+                
+            } else if ((size = meshPoints.size()) > 3) {
+                tmp = normalize(cross(meshPoints[size-3]-meshPoints[size-2], meshPoints[size-3]-meshPoints[size-1]));
+                if (tmp.y < 0) tmp *= -1;
+                normls.push_back(tmp);
+            }
         }
     }
-    return mesh;
 }
 
 // Создаём замлю
@@ -521,7 +919,7 @@ void CreateGround() {
     // Земля состоит из двух треугольников
     groundPointsCount = 2*GROUND_SIDE*GROUND_SIDE - 3*GROUND_SIDE + 2;
     GenAlt();
-    vector <VM::vec3> meshPoints = GenGroundMesh();
+    GenGroundMesh();
     ILuint	id;
     ilGenImages ( 1, &id );
     ilBindImage ( id );
@@ -551,14 +949,23 @@ void CreateGround() {
     glGenBuffers(1, &pointsBuffer);                                              CHECK_GL_ERRORS
     glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);                                 CHECK_GL_ERRORS
     glBufferData(GL_ARRAY_BUFFER, sizeof(VM::vec3) * meshPoints.size(), meshPoints.data(), GL_STATIC_DRAW); CHECK_GL_ERRORS
-
+    
     glGenVertexArrays(1, &groundVAO);                                            CHECK_GL_ERRORS
     glBindVertexArray(groundVAO);                                                CHECK_GL_ERRORS
-
+    
     GLuint index = glGetAttribLocation(groundShader, "point");                   CHECK_GL_ERRORS
     glEnableVertexAttribArray(index);                                            CHECK_GL_ERRORS
     glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
-
+    
+    GLuint normalsBuffer;
+    glGenBuffers(1, &normalsBuffer);                                              CHECK_GL_ERRORS
+    glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);                                 CHECK_GL_ERRORS
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VM::vec3) * normls.size(), normls.data(), GL_STATIC_DRAW); CHECK_GL_ERRORS
+    
+    GLuint normal_location = glGetAttribLocation(groundShader, "normal");                  CHECK_GL_ERRORS
+    glEnableVertexAttribArray(normal_location);                                            CHECK_GL_ERRORS
+    glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
+    
     glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
 }
@@ -582,6 +989,11 @@ int main(int argc, char **argv)
         cout << "Ground created" << endl;
         CreateGrass();
         cout << "Grass created" << endl;
+        // Setup and compile our shaders
+        shader = Shader("shaders/tree.vert", "shaders/tree.frag");
+        // Load models
+        our_model = Model("../Texture/crysis/nanosuit.obj");
+
         glutMainLoop();
     } catch (string s) {
         cout << s << endl;

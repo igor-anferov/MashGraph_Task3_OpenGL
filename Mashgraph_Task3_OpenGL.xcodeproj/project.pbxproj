@@ -7,9 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7873843A1DD7D09D00ACCA73 /* libIL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384371DD7D09D00ACCA73 /* libIL.a */; };
-		7873843B1DD7D09D00ACCA73 /* libILU.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384381DD7D09D00ACCA73 /* libILU.a */; };
-		7873843C1DD7D09D00ACCA73 /* libILUT.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384391DD7D09D00ACCA73 /* libILUT.a */; };
+		78A3CE4A1DE83C1100DB5630 /* libassimp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A3CE481DE837AC00DB5630 /* libassimp.dylib */; };
+		78A3CE4B1DE83CDB00DB5630 /* libIL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384371DD7D09D00ACCA73 /* libIL.a */; };
+		78A3CE4C1DE83CDD00DB5630 /* libILU.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384381DD7D09D00ACCA73 /* libILU.a */; };
+		78A3CE4D1DE83CE000DB5630 /* libILUT.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384391DD7D09D00ACCA73 /* libILUT.a */; };
+		78A785351DE7130300156D8D /* SOIL.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785341DE7130300156D8D /* SOIL.c */; };
+		78A785371DE7134900156D8D /* image_DXT.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785361DE7134900156D8D /* image_DXT.c */; };
+		78A785391DE7134D00156D8D /* image_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785381DE7134D00156D8D /* image_helper.c */; };
+		78A7853B1DE7135100156D8D /* stb_image_aug.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A7853A1DE7135100156D8D /* stb_image_aug.c */; };
 		78F04C941DD642200059C321 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78F04C891DD642200059C321 /* Camera.cpp */; };
 		78F04C951DD642200059C321 /* GL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78F04C8A1DD642200059C321 /* GL.cpp */; };
 		78F04C961DD642200059C321 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78F04C8B1DD642200059C321 /* main.cpp */; };
@@ -44,6 +49,7 @@
 		787384391DD7D09D00ACCA73 /* libILUT.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libILUT.a; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILUT.a; sourceTree = "<group>"; };
 		7873843D1DD7D0D800ACCA73 /* IL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IL.h; sourceTree = "<group>"; };
 		7873843E1DD7D77200ACCA73 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = Mashgraph_Task3_OpenGL/bin/shaders; sourceTree = "<group>"; };
+		78A3CE481DE837AC00DB5630 /* libassimp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.dylib; path = "Mashgraph_Task3_OpenGL/assimp-3.3.1/lib/libassimp.dylib"; sourceTree = "<group>"; };
 		78A4487A1DD724840006C95E /* Camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
 		78A4487B1DD724840006C95E /* GL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GL.h; sourceTree = "<group>"; };
 		78A4487C1DD724840006C95E /* mat4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mat4.h; sourceTree = "<group>"; };
@@ -55,6 +61,20 @@
 		78A448821DD724840006C95E /* vec2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec2.h; sourceTree = "<group>"; };
 		78A448831DD724840006C95E /* vec3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec3.h; sourceTree = "<group>"; };
 		78A448841DD724840006C95E /* vec4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec4.h; sourceTree = "<group>"; };
+		78A785241DE5ADDB00156D8D /* libIL.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIL.1.dylib; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libIL.1.dylib; sourceTree = "<group>"; };
+		78A785251DE5ADDB00156D8D /* libILU.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libILU.1.dylib; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILU.1.dylib; sourceTree = "<group>"; };
+		78A785261DE5ADDB00156D8D /* libILUT.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libILUT.1.dylib; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILUT.1.dylib; sourceTree = "<group>"; };
+		78A7852D1DE711E400156D8D /* Simple_OpenGL_Image_Library */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Simple_OpenGL_Image_Library; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library; sourceTree = "<group>"; };
+		78A7852E1DE711F000156D8D /* libSOIL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSOIL.a; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/lib/libSOIL.a; sourceTree = "<group>"; };
+		78A785301DE712FA00156D8D /* image_DXT.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = image_DXT.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/image_DXT.c; sourceTree = "<group>"; };
+		78A785321DE712FF00156D8D /* image_helper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = image_helper.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/image_helper.c; sourceTree = "<group>"; };
+		78A785341DE7130300156D8D /* SOIL.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = SOIL.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/SOIL.c; sourceTree = "<group>"; };
+		78A785361DE7134900156D8D /* image_DXT.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = image_DXT.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/image_DXT.c; sourceTree = "<group>"; };
+		78A785381DE7134D00156D8D /* image_helper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = image_helper.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/image_helper.c; sourceTree = "<group>"; };
+		78A7853A1DE7135100156D8D /* stb_image_aug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = stb_image_aug.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/stb_image_aug.c; sourceTree = "<group>"; };
+		78A7853C1DE7135500156D8D /* test_SOIL.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = test_SOIL.cpp; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/test_SOIL.cpp; sourceTree = "<group>"; };
+		78A7853E1DE714F300156D8D /* stb_image-1.09.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "stb_image-1.09.c"; path = "Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/original/stb_image-1.09.c"; sourceTree = "<group>"; };
+		78A785401DE714F800156D8D /* stb_image-1.16.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "stb_image-1.16.c"; path = "Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/original/stb_image-1.16.c"; sourceTree = "<group>"; };
 		78F04C7F1DD641F40059C321 /* Mashgraph_Task3_OpenGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mashgraph_Task3_OpenGL; sourceTree = BUILT_PRODUCTS_DIR; };
 		78F04C891DD642200059C321 /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Camera.cpp; sourceTree = "<group>"; };
 		78F04C8A1DD642200059C321 /* GL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GL.cpp; sourceTree = "<group>"; };
@@ -78,9 +98,10 @@
 			files = (
 				78F04CA31DD644790059C321 /* OpenGL.framework in Frameworks */,
 				78F04CA11DD644720059C321 /* GLUT.framework in Frameworks */,
-				7873843A1DD7D09D00ACCA73 /* libIL.a in Frameworks */,
-				7873843B1DD7D09D00ACCA73 /* libILU.a in Frameworks */,
-				7873843C1DD7D09D00ACCA73 /* libILUT.a in Frameworks */,
+				78A3CE4B1DE83CDB00DB5630 /* libIL.a in Frameworks */,
+				78A3CE4C1DE83CDD00DB5630 /* libILU.a in Frameworks */,
+				78A3CE4D1DE83CE000DB5630 /* libILUT.a in Frameworks */,
+				78A3CE4A1DE83C1100DB5630 /* libassimp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,7 +131,17 @@
 		78F04C761DD641F40059C321 = {
 			isa = PBXGroup;
 			children = (
+				78A785401DE714F800156D8D /* stb_image-1.16.c */,
+				78A7853E1DE714F300156D8D /* stb_image-1.09.c */,
+				78A7853C1DE7135500156D8D /* test_SOIL.cpp */,
+				78A7853A1DE7135100156D8D /* stb_image_aug.c */,
+				78A785381DE7134D00156D8D /* image_helper.c */,
+				78A785361DE7134900156D8D /* image_DXT.c */,
+				78A785341DE7130300156D8D /* SOIL.c */,
+				78A785321DE712FF00156D8D /* image_helper.c */,
+				78A785301DE712FA00156D8D /* image_DXT.c */,
 				7873843E1DD7D77200ACCA73 /* shaders */,
+				78A7852D1DE711E400156D8D /* Simple_OpenGL_Image_Library */,
 				787384361DD7CFCE00ACCA73 /* DevIL_Mac */,
 				78A448791DD724600006C95E /* Headers */,
 				78F04C811DD641F40059C321 /* Mashgraph_Task3_OpenGL */,
@@ -149,6 +180,11 @@
 		78F04C9F1DD644710059C321 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				78A3CE481DE837AC00DB5630 /* libassimp.dylib */,
+				78A7852E1DE711F000156D8D /* libSOIL.a */,
+				78A785241DE5ADDB00156D8D /* libIL.1.dylib */,
+				78A785251DE5ADDB00156D8D /* libILU.1.dylib */,
+				78A785261DE5ADDB00156D8D /* libILUT.1.dylib */,
 				787384371DD7D09D00ACCA73 /* libIL.a */,
 				787384381DD7D09D00ACCA73 /* libILU.a */,
 				787384391DD7D09D00ACCA73 /* libILUT.a */,
@@ -226,6 +262,10 @@
 				78F04C961DD642200059C321 /* main.cpp in Sources */,
 				78F04C9D1DD642200059C321 /* vec3.cpp in Sources */,
 				78F04C971DD642200059C321 /* mat4.cpp in Sources */,
+				78A785351DE7130300156D8D /* SOIL.c in Sources */,
+				78A785371DE7134900156D8D /* image_DXT.c in Sources */,
+				78A785391DE7134D00156D8D /* image_helper.c in Sources */,
+				78A7853B1DE7135100156D8D /* stb_image_aug.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,11 +362,16 @@
 		78F04C871DD641F40059C321 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DYLIB_INSTALL_NAME_BASE = "$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib";
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/include",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/lib",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/lib",
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-openmp",
@@ -340,11 +385,16 @@
 		78F04C881DD641F40059C321 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DYLIB_INSTALL_NAME_BASE = "$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib";
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/include",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/lib",
+					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/lib",
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-openmp",

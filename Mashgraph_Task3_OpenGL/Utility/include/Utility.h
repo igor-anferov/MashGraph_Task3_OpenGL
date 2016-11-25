@@ -5,6 +5,7 @@
 #include "vec2.h"
 #include "Camera.h"
 #include "ShaderProgram.h"
+#include "SOIL.h"
 #include "IL.h"
 
 #endif // UTILITY_H_INCLUDED
