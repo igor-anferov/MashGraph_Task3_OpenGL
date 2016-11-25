@@ -43,9 +43,9 @@ void main() {
     scaleMatrix[0][0] = 0.012*size;
     scaleMatrix[1][1] = 0.1*size;
     mat4 positionMatrix = mat4(1.0);
-    positionMatrix[3][0] = position.x;
+    positionMatrix[3][0] = position.x*2-1;
     positionMatrix[3][1] = position.y;
-    positionMatrix[3][2] = position.z;
+    positionMatrix[3][2] = position.z*2-1;
     
     norm = vec3(randomTiltMatrixX * randomTiltMatrixZ * rotation * vec4(norm, 1));
     point_world = vec3(positionMatrix * tiltMatrix * randomTiltMatrixX * randomTiltMatrixZ * rotation * scaleMatrix * point);

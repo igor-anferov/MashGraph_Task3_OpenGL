@@ -348,7 +348,7 @@ double mod(double x, double y) {
     return  sign * (int( x / y ) % 2 ? y - (x - y * int( x / y )) : (x - y * int( x / y ))) ;
 }
 
-const uint GRASS_INSTANCES = 10000; // Количество травинок
+const uint GRASS_INSTANCES = 50000; // Количество травинок
 const uint GROUND_SIDE = 1000;
 const uint GRASS_SIDE = 100;
 const uint TITLE_MAP_SIDE = 50;
@@ -427,6 +427,7 @@ void DrawGround() {
 }
 
 void DrawSkyBox() {
+    glDepthMask(GL_FALSE);
     glUseProgram(skyboxShader);                                                  CHECK_GL_ERRORS
     GLint cameraLocation = glGetUniformLocation(skyboxShader, "camera");         CHECK_GL_ERRORS
     glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
@@ -435,6 +436,7 @@ void DrawSkyBox() {
     glDrawArrays(GL_TRIANGLES, 0, 36);                       CHECK_GL_ERRORS
     glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     glUseProgram(0);                                                             CHECK_GL_ERRORS
+    glDepthMask(GL_TRUE);
 }
 
 // Обновление смещения травинок
@@ -870,7 +872,7 @@ void CreateGrass() {
 void CreateCamera() {
     camera.angle = 45.0f / 180.0f * M_PI;
     camera.direction = VM::vec3(0, 0.3, -1);
-    camera.position = VM::vec3(0.5, 0.2, 0);
+    camera.position = VM::vec3(0, 0.2, 0);
     camera.screenRatio = (float)screenWidth / screenHeight;
     camera.up = VM::vec3(0, 1, 0);
     camera.zfar = 50.0f;
