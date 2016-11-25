@@ -175,10 +175,10 @@ GLint TextureFromFile(const char* path, string directory) {
     GLuint textureID;
     glGenTextures(1, &textureID);
     int width,height;
-    unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+    unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
     // Assign texture to ID
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
     
     // Parameters
@@ -262,9 +262,11 @@ private:
             vector.z = mesh->mVertices[i].z;
             vertex.Position = vector;
             // Normals
-            vector.x = mesh->mNormals[i].x;
-            vector.y = mesh->mNormals[i].y;
-            vector.z = mesh->mNormals[i].z;
+            if (mesh->mNormals) {
+                vector.x = mesh->mNormals[i].x;
+                vector.y = mesh->mNormals[i].y;
+                vector.z = mesh->mNormals[i].z;
+            }
             vertex.Normal = vector;
             // Texture Coordinates
             if(mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
@@ -424,7 +426,7 @@ void DrawGround() {
 
 void DrawSkyBox() {
     glDepthMask(GL_FALSE);
-    glUseProgram(skyboxShader);                                                  CHECK_GL_ERRORS
+    glUseProgram(skyboxShader);                                                 CHECK_GL_ERRORS
     GLint cameraLocation = glGetUniformLocation(skyboxShader, "camera");         CHECK_GL_ERRORS
     glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
     glBindTexture(GL_TEXTURE_CUBE_MAP, SkyBoxTexture);
@@ -493,6 +495,11 @@ void DrawModel() {
     shader.Use();   // <-- Don't forget this one!
     GLint cameraLocation = glGetUniformLocation(shader.Program, "camera");          CHECK_GL_ERRORS
     glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
+    GLint source_coordLocation = glGetUniformLocation(shader.Program, "source_coord");         CHECK_GL_ERRORS
+    glUniform3fv(source_coordLocation, 1, (GLfloat *)&light_source); CHECK_GL_ERRORS
+    GLint cameraPosLocation = glGetUniformLocation(shader.Program, "cameraPos");         CHECK_GL_ERRORS
+    glUniform3fv(cameraPosLocation, 1, (GLfloat *)&(camera.position)); CHECK_GL_ERRORS
+
     our_model.Draw(shader);
 }
 
@@ -990,7 +997,7 @@ int main(int argc, char **argv)
         // Setup and compile our shaders
         shader = Shader("shaders/tree.vert", "shaders/tree.frag");
         // Load models
-        our_model = Model("../Texture/crysis/nanosuit.obj");
+        our_model = Model("../Texture/Tree-1/Tree.obj");
 
         glutMainLoop();
     } catch (string s) {

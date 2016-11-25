@@ -95,7 +95,8 @@ vec3 max(const vec3& v, const vec3& w) {
 
 vec3 normalize(const vec3& v) {
     float len = length(v);
-    if (len == 0.0f) throw "Null-length vector normalization.";
+    if (len == 0.0f)
+        return v;
     return v / len;
 }
 
