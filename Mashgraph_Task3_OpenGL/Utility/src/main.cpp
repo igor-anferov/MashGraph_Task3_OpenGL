@@ -356,7 +356,7 @@ const uint TITLE_MAP_SIDE = 50;
 GL::Camera camera;               // Мы предоставляем Вам реализацию камеры. В OpenGL камера - это просто 2 матрицы. Модельно-видовая матрица и матрица проекции. // ###
                                  // Задача этого класса только в том чтобы обработать ввод с клавиатуры и правильно сформировать эти матрицы.
                                  // Вы можете просто пользоваться этим классом для расчёта указанных матриц.
-VM::vec3 light_source(0.5,1,0.5);
+VM::vec3 light_source(1,0.3,-0.35);
 Shader shader;
 Model our_model;
 
@@ -374,9 +374,12 @@ vector<GLfloat> grassRotations(GRASS_INSTANCES);
 vector<VM::vec3> grassPositions;
 
 GLuint groundShader; // Шейдер для земли
+GLuint skyboxShader; // Шейдер для земли
 GLuint groundVAO; // VAO для земли
+GLuint skyboxVAO; // VAO для земли
 GLuint texture;   // текстура земли
 GLuint grassTexture;   // текстура травы
+GLuint SkyBoxTexture;   // текстура травы
 GLuint groundPointsCount;
 
 GLfloat altitudeMap[GROUND_SIDE][GROUND_SIDE];
@@ -394,7 +397,7 @@ bool captureMouse = true;
 void DrawGround() {
     // Используем шейдер для земли
     glUseProgram(groundShader);                                                  CHECK_GL_ERRORS
-
+    
     // Устанавливаем юниформ для шейдера. В данном случае передадим перспективную матрицу камеры
     // Находим локацию юниформа 'camera' в шейдере
     GLint cameraLocation = glGetUniformLocation(groundShader, "camera");         CHECK_GL_ERRORS
@@ -413,13 +416,24 @@ void DrawGround() {
     glBindTexture(GL_TEXTURE_2D, texture);
     // Подключаем VAO, который содержит буферы, необходимые для отрисовки земли
     glBindVertexArray(groundVAO);                                                CHECK_GL_ERRORS
-
+    
     // Рисуем землю
     glDrawArrays(GL_TRIANGLE_STRIP, 0, groundPointsCount);                       CHECK_GL_ERRORS
-
+    
     // Отсоединяем VAO
     glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     // Отключаем шейдер
+    glUseProgram(0);                                                             CHECK_GL_ERRORS
+}
+
+void DrawSkyBox() {
+    glUseProgram(skyboxShader);                                                  CHECK_GL_ERRORS
+    GLint cameraLocation = glGetUniformLocation(skyboxShader, "camera");         CHECK_GL_ERRORS
+    glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
+    glBindTexture(GL_TEXTURE_CUBE_MAP, SkyBoxTexture);
+    glBindVertexArray(skyboxVAO);                                                CHECK_GL_ERRORS
+    glDrawArrays(GL_TRIANGLES, 0, 36);                       CHECK_GL_ERRORS
+    glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     glUseProgram(0);                                                             CHECK_GL_ERRORS
 }
 
@@ -549,6 +563,7 @@ void RenderLayouts() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     // Рисуем меши
+    DrawSkyBox();
     DrawGround();
     DrawGrass();
     DrawModel();
@@ -970,6 +985,58 @@ void CreateGround() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
 }
 
+void CreateSkyBox() {
+    
+/* ---------------------------- SKY BOX TEXTURE ---------------------------- */
+    glGenTextures(1, &SkyBoxTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, SkyBoxTexture);
+    int width,height;
+    const char* textures_faces[] = {"../Texture/skybox/FullMoonLeft2048.png",
+        "../Texture/skybox/FullMoonRight2048.png",
+        "../Texture/skybox/FullMoonTop2048.png",
+        "../Texture/skybox/FullMoonBottom2048.png",
+        "../Texture/skybox/FullMoonFront2048.png",
+                                    "../Texture/skybox/FullMoonBack2048.png"};
+    unsigned char* image;
+    for(GLuint i = 0; i < 6; i++) {
+        image = SOIL_load_image(textures_faces[i], &width, &height, 0, SOIL_LOAD_RGB);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    
+/* ---------------------------- SKY BOX VERTICES ---------------------------- */
+    GLfloat skyboxVertices[] = {
+        -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, 1.0f, -1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,  -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
+         -1.0f,  1.0f, -1.0f, 1.0f,  1.0f, -1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
+         -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, -1.0f,  1.0f
+    };
+    
+    skyboxShader = GL::CompileShaderProgram("skybox");
+
+    GLuint pointsBuffer;
+    glGenBuffers(1, &pointsBuffer);                                              CHECK_GL_ERRORS
+    glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);                                 CHECK_GL_ERRORS
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW); CHECK_GL_ERRORS
+    
+    glGenVertexArrays(1, &skyboxVAO);                                            CHECK_GL_ERRORS
+    glBindVertexArray(skyboxVAO);                                                CHECK_GL_ERRORS
+    
+    GLuint index = glGetAttribLocation(skyboxShader, "point");                   CHECK_GL_ERRORS
+    glEnableVertexAttribArray(index);                                            CHECK_GL_ERRORS
+    glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
+
+    glBindVertexArray(0);                                                        CHECK_GL_ERRORS
+    glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
+}
+
 int main(int argc, char **argv)
 {
     try {
@@ -982,7 +1049,8 @@ int main(int argc, char **argv)
         cout << "glew inited" << endl;
 #endif
         glEnable(GL_MULTISAMPLE);
-
+        CreateSkyBox();
+        cout << "SkyBox created" << endl;
         CreateCamera();
         cout << "Camera created" << endl;
         CreateGround();
