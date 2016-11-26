@@ -119,7 +119,7 @@ public:
         this->textures = textures;
         this->setupMesh();
     };
-    void Draw(Shader shader) {
+    void Draw(Shader shader, int instance_count) {
         GLuint diffuseNr = 1;
         GLuint specularNr = 1;
         for(GLuint i = 0; i < this->textures.size(); i++) {
@@ -139,12 +139,12 @@ public:
         glActiveTexture(GL_TEXTURE0);
         // Draw mesh
         glBindVertexArray(this->VAO);
-        glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, instance_count);
         glBindVertexArray(0);
     };
-private:
     /* Render data */
     GLuint VAO, VBO, EBO;
+private:
     /* Functions    */
     void setupMesh() {
         glGenVertexArrays(1, &this->VAO);
@@ -201,14 +201,14 @@ public:
     }
     
     // Draws the model, and thus all its meshes
-    void Draw(Shader shader) {
+    void Draw(Shader shader, int instance_count = 1) {
         for(GLuint i = 0; i < this->meshes.size(); i++)
-            this->meshes[i].Draw(shader);
+        this->meshes[i].Draw(shader, instance_count);
     }
     
-private:
     /*  Model Data  */
     vector<Mesh> meshes;
+private:
     string directory;
     vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
     
@@ -351,6 +351,7 @@ double mod(double x, double y) {
 }
 
 const uint GRASS_INSTANCES = 50000; // Количество травинок
+const uint ROSES_INSTANCES = 100; // Количество роз
 const uint GROUND_SIDE = 1000;
 const uint GRASS_SIDE = 100;
 const uint TITLE_MAP_SIDE = 50;
@@ -359,8 +360,14 @@ GL::Camera camera;               // Мы предоставляем Вам ре�
                                  // Задача этого класса только в том чтобы обработать ввод с клавиатуры и правильно сформировать эти матрицы.
                                  // Вы можете просто пользоваться этим классом для расчёта указанных матриц.
 VM::vec3 light_source(1,0.3,-0.35);
-Shader shader;
-Model our_model;
+Shader treeShader;
+Model treeModel;
+
+Shader stoneShader;
+Model stoneModel;
+
+Shader roseShader;
+Model roseModel;
 
 GLuint grassPointsCount; // Количество вершин у модели травинки
 GLuint grassShader;      // Шейдер, рисующий траву
@@ -372,6 +379,7 @@ vector<VM::vec2> grassRandomTilting(GRASS_INSTANCES); // Вектор с угл�
 
 vector<GLfloat> grassRotations(GRASS_INSTANCES);
 vector<VM::vec3> grassPositions(GRASS_INSTANCES);
+vector<VM::vec3> rosesPositions(ROSES_INSTANCES);
 
 GLuint groundShader; // Шейдер для земли
 GLuint skyboxShader; // Шейдер для земли
@@ -491,7 +499,7 @@ void DrawGrass() {
     glUseProgram(0);                                                             CHECK_GL_ERRORS
 }
 
-void DrawModel() {
+void DrawModel(Model & model, Shader & shader, VM::vec3 transl) {
     shader.Use();   // <-- Don't forget this one!
     GLint cameraLocation = glGetUniformLocation(shader.Program, "camera");          CHECK_GL_ERRORS
     glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
@@ -499,8 +507,28 @@ void DrawModel() {
     glUniform3fv(source_coordLocation, 1, (GLfloat *)&light_source); CHECK_GL_ERRORS
     GLint cameraPosLocation = glGetUniformLocation(shader.Program, "cameraPos");         CHECK_GL_ERRORS
     glUniform3fv(cameraPosLocation, 1, (GLfloat *)&(camera.position)); CHECK_GL_ERRORS
+    GLint translationPosLocation = glGetUniformLocation(shader.Program, "translation");         CHECK_GL_ERRORS
+    glUniform3fv(translationPosLocation, 1, (GLfloat *)&(transl)); CHECK_GL_ERRORS
 
-    our_model.Draw(shader);
+    model.Draw(shader);
+}
+
+void DrawRose() {
+    static timeval tv2;
+    gettimeofday(&tv2, 0);
+    GLfloat time = (tv2.tv_sec %1000 * 1e6 + tv2.tv_usec)/0.5e6;
+    
+    roseShader.Use();
+    GLint cameraLocation = glGetUniformLocation(roseShader.Program, "camera");          CHECK_GL_ERRORS
+    glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
+    GLint source_coordLocation = glGetUniformLocation(roseShader.Program, "source_coord");         CHECK_GL_ERRORS
+    glUniform3fv(source_coordLocation, 1, (GLfloat *)&light_source); CHECK_GL_ERRORS
+    GLint cameraPosLocation = glGetUniformLocation(roseShader.Program, "cameraPos");         CHECK_GL_ERRORS
+    glUniform3fv(cameraPosLocation, 1, (GLfloat *)&(camera.position)); CHECK_GL_ERRORS
+    GLint timePosLocation = glGetUniformLocation(roseShader.Program, "time");         CHECK_GL_ERRORS
+    glUniform1f(timePosLocation, time); CHECK_GL_ERRORS
+    
+    roseModel.Draw(roseShader, ROSES_INSTANCES);
 }
 
 // Эта функция вызывается для обновления экрана
@@ -515,7 +543,9 @@ void RenderLayouts() {
     DrawSkyBox();
     DrawGround();
     DrawGrass();
-    DrawModel();
+    DrawModel(treeModel, treeShader, VM::vec3(0.5, altitudeMap[int(0.5*(GROUND_SIDE-1))][int(0.5*(GROUND_SIDE-1))]*0.1, 0.5));
+    DrawModel(stoneModel, stoneShader, VM::vec3(0.7, altitudeMap[int(0.7*(GROUND_SIDE-1))][int(0.3*(GROUND_SIDE-1))]*0.1, 0.3));
+    DrawRose();
 
     glutSwapBuffers();
 }
@@ -616,9 +646,14 @@ void InitializeGLUT(int argc, char **argv) {
 }
 
 // Генерация позиций травинок (эту функцию вам придётся переписать)
-void GenerateGrassPositions() {
-    for (uint i = 0; i < GRASS_INSTANCES; ++i) {
+void GenerateGrassPositions(vector<VM::vec3> & grassPositions) {
+    for (uint i = 0; i < grassPositions.size(); ++i) {
         grassPositions[i] = VM::vec3((float)rand() / RAND_MAX, 0, (float)rand() / RAND_MAX);
+        if (pow((grassPositions[i].x-0.75),2)+pow((grassPositions[i].z-0.75),2)<0.0003 ||
+            pow((grassPositions[i].x-0.85),2)+pow((grassPositions[i].z-0.65),2)<0.003    ) {
+            i--;
+            continue;
+        }
         grassPositions[i].y = altitudeMap[int(grassPositions[i].x*(GROUND_SIDE-1))][int(grassPositions[i].z*(GROUND_SIDE-1))]*0.1;
     }
 }
@@ -686,7 +721,7 @@ void CreateGrass() {
     // Сохраняем количество вершин в меше травы
     grassPointsCount = grassPoints.size();
     // Создаём позиции для травинок
-    GenerateGrassPositions();
+    GenerateGrassPositions(grassPositions);
     GenerateGrassRotations();
     /* Компилируем шейдеры
     Эта функция принимает на вход название шейдера 'shaderName',
@@ -974,6 +1009,31 @@ void CreateSkyBox() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
 }
 
+void CreateRoses() {
+    GenerateGrassPositions(rosesPositions);
+    
+    roseShader = Shader("shaders/rose.vert", "shaders/rose.frag");
+    roseModel = Model("../Texture/rose/rose.obj");
+    
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, rosesPositions.size() * sizeof(VM::vec3), rosesPositions.data(), GL_STATIC_DRAW);
+
+    for(GLuint i = 0; i < roseModel.meshes.size(); i++) {
+        GLuint VAO = roseModel.meshes[i].VAO;
+        glBindVertexArray(VAO);
+        // Set attribute pointers for matrix (4 times vec4)
+        GLuint location = glGetAttribLocation(roseShader.Program, "translation");      CHECK_GL_ERRORS
+        glEnableVertexAttribArray(location);
+        glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribDivisor(location, 1);
+        
+        glBindVertexArray(0);
+    }
+
+}
+
 int main(int argc, char **argv)
 {
     try {
@@ -994,11 +1054,14 @@ int main(int argc, char **argv)
         cout << "Ground created" << endl;
         CreateGrass();
         cout << "Grass created" << endl;
-        // Setup and compile our shaders
-        shader = Shader("shaders/tree.vert", "shaders/tree.frag");
-        // Load models
-        our_model = Model("../Texture/Tree-1/Tree.obj");
-
+        // CREATE TREE
+        treeShader = Shader("shaders/tree.vert", "shaders/tree.frag");
+        treeModel = Model("../Texture/Tree-1/Tree.obj");
+        // CREATE STONE
+        stoneShader = Shader("shaders/stone.vert", "shaders/stone.frag");
+        stoneModel = Model("../Texture/Rock1/Rock1.obj");
+        CreateRoses();
+        
         glutMainLoop();
     } catch (string s) {
         cout << s << endl;

@@ -24,5 +24,5 @@ void main() {
     outColor = texture(ourTexture, points);
     if(outColor.a < 0.8)
         discard;
-    outColor *= vec4(light,1);
+    outColor *= vec4(light,1) * max(0,point_world.y*10);
 }
