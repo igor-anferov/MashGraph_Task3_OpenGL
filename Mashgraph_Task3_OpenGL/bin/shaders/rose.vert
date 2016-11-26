@@ -36,8 +36,8 @@ void main()
                                  0,       0,      0, 1
                                  );
     
-    point_world = vec3(translate * rotationY * scale * vec4(position, 1.0f));
-    norm = normalize(vec3(translate * rotationY * vec4(normal,1)));
+    point_world = vec3(translate * tiltMatrix * rotationY * scale * vec4(position, 1.0f));
+    norm = normalize(vec3(translate * tiltMatrix * rotationY * vec4(normal,1)));
     gl_Position = camera * translate * tiltMatrix * rotationY * scale * vec4(position, 1.0f);
     TexCoords = texCoords;
 }

@@ -350,8 +350,8 @@ double mod(double x, double y) {
     return  sign * (int( x / y ) % 2 ? y - (x - y * int( x / y )) : (x - y * int( x / y ))) ;
 }
 
-const uint GRASS_INSTANCES = 50000; // Количество травинок
-const uint ROSES_INSTANCES = 100; // Количество роз
+const uint GRASS_INSTANCES = 30000; // Количество травинок
+const uint ROSES_INSTANCES = 50; // Количество роз
 const uint GROUND_SIDE = 1000;
 const uint GRASS_SIDE = 100;
 const uint TITLE_MAP_SIDE = 50;
@@ -383,11 +383,14 @@ vector<VM::vec3> rosesPositions(ROSES_INSTANCES);
 
 GLuint groundShader; // Шейдер для земли
 GLuint skyboxShader; // Шейдер для земли
+GLuint butterflyShader; // Шейдер для земли
 GLuint groundVAO; // VAO для земли
 GLuint skyboxVAO; // VAO для земли
+GLuint butterflyVAO; // VAO для земли
 GLuint texture;   // текстура земли
 GLuint grassTexture;   // текстура травы
-GLuint SkyBoxTexture;   // текстура травы
+GLuint SkyBoxTexture;
+GLuint butterflyTexture;
 GLuint groundPointsCount;
 
 GLfloat altitudeMap[GROUND_SIDE][GROUND_SIDE];
@@ -499,6 +502,29 @@ void DrawGrass() {
     glUseProgram(0);                                                             CHECK_GL_ERRORS
 }
 
+void DrawButterfly() {
+    static timeval tv2;
+    gettimeofday(&tv2, 0);
+    GLfloat time = (tv2.tv_sec %1000 * 1e6 + tv2.tv_usec)/0.5e5;
+    
+    glUseProgram(butterflyShader);                                                   CHECK_GL_ERRORS
+    GLint cameraLocation = glGetUniformLocation(butterflyShader, "camera");          CHECK_GL_ERRORS
+    glUniformMatrix4fv(cameraLocation, 1, GL_TRUE, camera.getMatrix().data().data()); CHECK_GL_ERRORS
+    GLint source_coordLocation = glGetUniformLocation(butterflyShader, "source_coord");         CHECK_GL_ERRORS
+    glUniform3fv(source_coordLocation, 1, (GLfloat *)&light_source); CHECK_GL_ERRORS
+    GLint cameraPosLocation = glGetUniformLocation(butterflyShader, "cameraPos");         CHECK_GL_ERRORS
+    glUniform3fv(cameraPosLocation, 1, (GLfloat *)&(camera.position)); CHECK_GL_ERRORS
+    GLint timePosLocation = glGetUniformLocation(butterflyShader, "time");         CHECK_GL_ERRORS
+    glUniform1f(timePosLocation, time); CHECK_GL_ERRORS
+    
+    // Подключаем текстуру
+    glBindTexture(GL_TEXTURE_2D, butterflyTexture);
+    glBindVertexArray(butterflyVAO);                                                 CHECK_GL_ERRORS
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 6, 1);   CHECK_GL_ERRORS
+    glBindVertexArray(0);                                                        CHECK_GL_ERRORS
+    glUseProgram(0);                                                             CHECK_GL_ERRORS
+}
+
 void DrawModel(Model & model, Shader & shader, VM::vec3 transl) {
     shader.Use();   // <-- Don't forget this one!
     GLint cameraLocation = glGetUniformLocation(shader.Program, "camera");          CHECK_GL_ERRORS
@@ -546,6 +572,7 @@ void RenderLayouts() {
     DrawModel(treeModel, treeShader, VM::vec3(0.5, altitudeMap[int(0.5*(GROUND_SIDE-1))][int(0.5*(GROUND_SIDE-1))]*0.1, 0.5));
     DrawModel(stoneModel, stoneShader, VM::vec3(0.7, altitudeMap[int(0.7*(GROUND_SIDE-1))][int(0.3*(GROUND_SIDE-1))]*0.1, 0.3));
     DrawRose();
+    DrawButterfly();
 
     glutSwapBuffers();
 }
@@ -736,10 +763,6 @@ void CreateGrass() {
         longTilting[i].y = float(rand()) / RAND_MAX * (M_PI/12) + (M_PI/24);
     }
 
-    int width, height;
-    unsigned char* image = SOIL_load_image("container.jpg", &width, &height, 0,
-                                           SOIL_LOAD_RGB);
-    
     ILuint	id;
     ilEnable(IL_FORMAT_SET);
     ilSetInteger(IL_FORMAT_MODE,IL_RGBA);
@@ -841,8 +864,8 @@ void CreateGrass() {
 // Создаём камеру (Если шаблонная камера вам не нравится, то можете переделать, но я бы не стал)
 void CreateCamera() {
     camera.angle = 45.0f / 180.0f * M_PI;
-    camera.direction = VM::vec3(0, 0.3, -1);
-    camera.position = VM::vec3(0, 0.2, 0);
+    camera.direction = VM::vec3(-0.775125861, 0.011804048, -0.631696522);
+    camera.position = VM::vec3(-0.814950823, 0.113559671, -0.809640347);
     camera.screenRatio = (float)screenWidth / screenHeight;
     camera.up = VM::vec3(0, 1, 0);
     camera.zfar = 50.0f;
@@ -959,7 +982,7 @@ void CreateGround() {
 
 void CreateSkyBox() {
     
-/* ---------------------------- SKY BOX TEXTURE ---------------------------- */
+    /* ---------------------------- SKY BOX TEXTURE ---------------------------- */
     glGenTextures(1, &SkyBoxTexture);
     glBindTexture(GL_TEXTURE_CUBE_MAP, SkyBoxTexture);
     int width,height;
@@ -968,11 +991,12 @@ void CreateSkyBox() {
         "../Texture/skybox/FullMoonTop2048.png",
         "../Texture/skybox/FullMoonBottom2048.png",
         "../Texture/skybox/FullMoonFront2048.png",
-                                    "../Texture/skybox/FullMoonBack2048.png"};
+        "../Texture/skybox/FullMoonBack2048.png"};
     unsigned char* image;
     for(GLuint i = 0; i < 6; i++) {
         image = SOIL_load_image(textures_faces[i], &width, &height, 0, SOIL_LOAD_RGB);
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+        SOIL_free_image_data(image);
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -981,18 +1005,18 @@ void CreateSkyBox() {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     
-/* ---------------------------- SKY BOX VERTICES ---------------------------- */
+    /* ---------------------------- SKY BOX VERTICES ---------------------------- */
     GLfloat skyboxVertices[] = {
         -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f,  1.0f, -1.0f,
         -1.0f,  1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,
         -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, 1.0f, -1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f, -1.0f,
         1.0f, -1.0f, -1.0f,  -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
-         -1.0f,  1.0f, -1.0f, 1.0f,  1.0f, -1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
-         -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, -1.0f,  1.0f
+        -1.0f,  1.0f, -1.0f, 1.0f,  1.0f, -1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, -1.0f,  1.0f
     };
     
     skyboxShader = GL::CompileShaderProgram("skybox");
-
+    
     GLuint pointsBuffer;
     glGenBuffers(1, &pointsBuffer);                                              CHECK_GL_ERRORS
     glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);                                 CHECK_GL_ERRORS
@@ -1004,7 +1028,45 @@ void CreateSkyBox() {
     GLuint index = glGetAttribLocation(skyboxShader, "point");                   CHECK_GL_ERRORS
     glEnableVertexAttribArray(index);                                            CHECK_GL_ERRORS
     glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
+    
+    glBindVertexArray(0);                                                        CHECK_GL_ERRORS
+    glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
+}
 
+void CreateButterfly() {
+    /* ---------------------------- BUTTERFLY TEXTURE ---------------------------- */
+    glGenTextures(1, &butterflyTexture);
+    glBindTexture(GL_TEXTURE_2D, butterflyTexture);
+    
+    int width,height;
+    unsigned char* image;
+    image = SOIL_load_image("../Textures/butterfly.png", &width, &height, 0, SOIL_LOAD_RGBA);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    SOIL_free_image_data(image);
+    
+    /* ---------------------------- BUTTERFLY VERTICES ---------------------------- */
+    GLfloat vertices[] = {-1,0,-1,1,0,0,0,1,1,0,1,1};
+    
+    butterflyShader = GL::CompileShaderProgram("butterfly");
+    
+    GLuint pointsBuffer;
+    glGenBuffers(1, &pointsBuffer);                                              CHECK_GL_ERRORS
+    glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);                                 CHECK_GL_ERRORS
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);   CHECK_GL_ERRORS
+    
+    glGenVertexArrays(1, &butterflyVAO);                                            CHECK_GL_ERRORS
+    glBindVertexArray(butterflyVAO);                                                CHECK_GL_ERRORS
+    
+    GLuint index = glGetAttribLocation(butterflyShader, "point");                   CHECK_GL_ERRORS
+    glEnableVertexAttribArray(index);                                            CHECK_GL_ERRORS
+    glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
+    
     glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
 }
@@ -1057,10 +1119,15 @@ int main(int argc, char **argv)
         // CREATE TREE
         treeShader = Shader("shaders/tree.vert", "shaders/tree.frag");
         treeModel = Model("../Texture/Tree-1/Tree.obj");
+        cout << "Tree created" << endl;
         // CREATE STONE
         stoneShader = Shader("shaders/stone.vert", "shaders/stone.frag");
         stoneModel = Model("../Texture/Rock1/Rock1.obj");
+        cout << "Stone created" << endl;
         CreateRoses();
+        cout << "Roses created" << endl;
+        CreateButterfly();
+        cout << "Butterfly created" << endl;
         
         glutMainLoop();
     } catch (string s) {

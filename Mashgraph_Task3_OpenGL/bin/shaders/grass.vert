@@ -50,7 +50,7 @@ void main() {
     positionMatrix[3][1] = position.y;
     positionMatrix[3][2] = position.z*2-1;
     
-    norm = vec3(randomTiltMatrixX * randomTiltMatrixZ * rotation * vec4(norm, 1));
+    norm = vec3(tiltMatrix * randomTiltMatrixX * randomTiltMatrixZ * rotation * vec4(norm, 1));
     point_world = vec3(positionMatrix * tiltMatrix * randomTiltMatrixX * randomTiltMatrixZ * rotation * scaleMatrix * point);
 	gl_Position = camera * positionMatrix * tiltMatrix * randomTiltMatrixX * randomTiltMatrixZ * rotation * scaleMatrix * point;
 }

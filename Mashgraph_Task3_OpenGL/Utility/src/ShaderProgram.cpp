@@ -34,6 +34,9 @@ GLuint CompileShaderProgram(const std::string& shadername) {
     glAttachShader(ID, fragSh);                                                  CHECK_GL_ERRORS
 
     glLinkProgram(ID);                                                           CHECK_GL_ERRORS
+    
+    glDeleteShader(vertSh);                                                      CHECK_GL_ERRORS
+    glDeleteShader(fragSh);                                                      CHECK_GL_ERRORS
 
     if (ShaderProgramStatus(ID, GL_LINK_STATUS) != GL_TRUE) {
         std::cerr << "LINKING ERROR | Line: " <<  __LINE__ << std::endl;

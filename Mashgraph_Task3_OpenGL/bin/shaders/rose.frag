@@ -27,5 +27,5 @@ void main() {
     if (color.a < 0.8) {
         discard;
     }
-        color *= vec4(light,1);
+    color *= vec4(light,1) * max(0,point_world.y*10);
 }
