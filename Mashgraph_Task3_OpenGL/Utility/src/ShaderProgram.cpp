@@ -25,7 +25,7 @@ void CompileShader(const std::string &name, GLuint &shader, GLenum shaderType) {
 }
 
 GLuint CompileShaderProgram(const std::string& shadername) {
-    GLuint ID = glCreateProgram();
+    GLuint ID = glCreateProgram();                                                  CHECK_GL_ERRORS
     GLuint vertSh, fragSh;
     CompileShader("shaders/" + shadername + ".vert", vertSh, GL_VERTEX_SHADER);
     CompileShader("shaders/" + shadername + ".frag", fragSh, GL_FRAGMENT_SHADER);

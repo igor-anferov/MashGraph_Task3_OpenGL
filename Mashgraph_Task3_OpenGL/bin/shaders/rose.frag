@@ -15,11 +15,11 @@ void main() {
     vec3 ambient_light = 0.2 * vec3(1,1,1);
     
     vec3 source_dir = normalize(source_coord - point_world);
-    vec3 diffuse_light = 0.6 * max(dot(norm, source_dir), 0) * vec3(1,1,1);
+    vec3 diffuse_light = 0.8 * max(dot(norm, source_dir), 0) * vec3(1,1,1);
     
     vec3 camera_dir = normalize(cameraPos - point_world);
     vec3 reflectDir = reflect(-source_dir, norm);
-    vec3 specular_light = 0.2 * pow(max(dot(camera_dir, reflectDir), 0), 8) * vec3(1,1,1);
+    vec3 specular_light = 0.1 * pow(max(dot(camera_dir, reflectDir), 0), 8) * vec3(1,1,1);
     
     vec3 light = ambient_light + diffuse_light + specular_light;
     

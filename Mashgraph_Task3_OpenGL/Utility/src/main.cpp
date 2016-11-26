@@ -390,7 +390,7 @@ GLuint butterflyVAO; // VAO для земли
 GLuint texture;   // текстура земли
 GLuint grassTexture;   // текстура травы
 GLuint SkyBoxTexture;
-GLuint butterflyTexture;
+GLuint butterflyTexture[3];
 GLuint groundPointsCount;
 
 GLfloat altitudeMap[GROUND_SIDE][GROUND_SIDE];
@@ -518,9 +518,17 @@ void DrawButterfly() {
     glUniform1f(timePosLocation, time); CHECK_GL_ERRORS
     
     // Подключаем текстуру
-    glBindTexture(GL_TEXTURE_2D, butterflyTexture);
+    for (int i=0; i<3; i++) {
+        glActiveTexture(GL_TEXTURE0+i);                                                 CHECK_GL_ERRORS
+        glBindTexture(GL_TEXTURE_2D, butterflyTexture[i]);                                                 CHECK_GL_ERRORS
+    }
     glBindVertexArray(butterflyVAO);                                                 CHECK_GL_ERRORS
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 6, 1);   CHECK_GL_ERRORS
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 6, 3);   CHECK_GL_ERRORS
+    for (int i=0; i<3; i++) {
+        glActiveTexture(GL_TEXTURE0+i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     glUseProgram(0);                                                             CHECK_GL_ERRORS
 }
@@ -1034,39 +1042,75 @@ void CreateSkyBox() {
 }
 
 void CreateButterfly() {
-    /* ---------------------------- BUTTERFLY TEXTURE ---------------------------- */
-    glGenTextures(1, &butterflyTexture);
-    glBindTexture(GL_TEXTURE_2D, butterflyTexture);
-    
-    int width,height;
-    unsigned char* image;
-    image = SOIL_load_image("../Textures/butterfly.png", &width, &height, 0, SOIL_LOAD_RGBA);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    butterflyShader = GL::CompileShaderProgram("butterfly");
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    SOIL_free_image_data(image);
+    /* ---------------------------- BUTTERFLY TEXTURE ---------------------------- */
+    glGenTextures(3, butterflyTexture);                                              CHECK_GL_ERRORS
+    vector<string> ind = {"1","2","3"};
+    glUseProgram(butterflyShader);
+    for (int i=0; i<3; i++) {
+        GLuint textLocation = glGetUniformLocation(butterflyShader, (string("text")+ind[i]).c_str());                                           CHECK_GL_ERRORS
+        glUniform1i(textLocation, i);                                           CHECK_GL_ERRORS
+        
+        glActiveTexture(GL_TEXTURE0+i);                                           CHECK_GL_ERRORS
+        glBindTexture(GL_TEXTURE_2D, butterflyTexture[i]);                                              CHECK_GL_ERRORS
+        
+        int width,height;
+        unsigned char* image;
+        image = SOIL_load_image((string("../Texture/butterflies/butterfly")+ind[i]+string(".png")).c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);                                              CHECK_GL_ERRORS
+        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);                                              CHECK_GL_ERRORS
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);                                              CHECK_GL_ERRORS
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);                                              CHECK_GL_ERRORS
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);                                              CHECK_GL_ERRORS
+        glGenerateMipmap(GL_TEXTURE_2D);                                              CHECK_GL_ERRORS
+        glBindTexture(GL_TEXTURE_2D, 0);                                              CHECK_GL_ERRORS
+        SOIL_free_image_data(image);
+    }
+    glActiveTexture(GL_TEXTURE0);                                           CHECK_GL_ERRORS
+    glUseProgram(0);
+
     
     /* ---------------------------- BUTTERFLY VERTICES ---------------------------- */
     GLfloat vertices[] = {-1,0,-1,1,0,0,0,1,1,0,1,1};
+    GLfloat rads[] = {0.8, 0.4, 0.5};
+    GLfloat center[] = { 0,  0.1,   0,
+                         0.5,  0.15,  0.5,
+                         -0.4,  0.125, -0.4 };
     
-    butterflyShader = GL::CompileShaderProgram("butterfly");
-    
+    glGenVertexArrays(1, &butterflyVAO);                                            CHECK_GL_ERRORS
+    glBindVertexArray(butterflyVAO);                                                CHECK_GL_ERRORS
+
     GLuint pointsBuffer;
     glGenBuffers(1, &pointsBuffer);                                              CHECK_GL_ERRORS
     glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);                                 CHECK_GL_ERRORS
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);   CHECK_GL_ERRORS
     
-    glGenVertexArrays(1, &butterflyVAO);                                            CHECK_GL_ERRORS
-    glBindVertexArray(butterflyVAO);                                                CHECK_GL_ERRORS
-    
     GLuint index = glGetAttribLocation(butterflyShader, "point");                   CHECK_GL_ERRORS
     glEnableVertexAttribArray(index);                                            CHECK_GL_ERRORS
     glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
     
+    GLuint radiusBuffer;
+    glGenBuffers(1, &radiusBuffer);                                              CHECK_GL_ERRORS
+    glBindBuffer(GL_ARRAY_BUFFER, radiusBuffer);                                 CHECK_GL_ERRORS
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rads), rads, GL_STATIC_DRAW);   CHECK_GL_ERRORS
+    
+    index = glGetAttribLocation(butterflyShader, "radius");                   CHECK_GL_ERRORS
+    glEnableVertexAttribArray(index);                                            CHECK_GL_ERRORS
+    glVertexAttribPointer(index, 1, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
+    glVertexAttribDivisor(index, 1);                                  CHECK_GL_ERRORS
+
+    GLuint centerBuffer;
+    glGenBuffers(1, &centerBuffer);                                              CHECK_GL_ERRORS
+    glBindBuffer(GL_ARRAY_BUFFER, centerBuffer);                                 CHECK_GL_ERRORS
+    glBufferData(GL_ARRAY_BUFFER, sizeof(center), center, GL_STATIC_DRAW);   CHECK_GL_ERRORS
+    
+    index = glGetAttribLocation(butterflyShader, "center");                   CHECK_GL_ERRORS
+    glEnableVertexAttribArray(index);                                            CHECK_GL_ERRORS
+    glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, 0);                   CHECK_GL_ERRORS
+    glVertexAttribDivisor(index, 1);                                  CHECK_GL_ERRORS
+
     glBindVertexArray(0);                                                        CHECK_GL_ERRORS
     glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
 }
