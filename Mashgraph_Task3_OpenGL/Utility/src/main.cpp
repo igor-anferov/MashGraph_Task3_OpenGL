@@ -520,7 +520,7 @@ void FinishProgram() {
 
 // Обработка события нажатия клавиши (специальные клавиши обрабатываются в функции SpecialButtons)
 void KeyboardEvents(unsigned char key, int x, int y) {
-    static int SSAA = 0;
+    static int MSAA = 0;
     if (key == 27) {
         FinishProgram();
     } else if (key == 'w') {
@@ -528,12 +528,12 @@ void KeyboardEvents(unsigned char key, int x, int y) {
     } else if (key == 's') {
         camera.goBack();
     } else if (key == 'a') {
-        if (SSAA) {
+        if (MSAA) {
             glDisable(GL_MULTISAMPLE);
-            SSAA = 0;
+            MSAA = 0;
         } else {
             glEnable(GL_MULTISAMPLE);
-            SSAA = 1;
+            MSAA = 1;
         }
     } else if (key == 'm') {
         captureMouse = !captureMouse;
