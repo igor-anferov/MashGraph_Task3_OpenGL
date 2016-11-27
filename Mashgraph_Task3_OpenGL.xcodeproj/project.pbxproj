@@ -8,9 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		78A3CE4A1DE83C1100DB5630 /* libassimp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A3CE481DE837AC00DB5630 /* libassimp.dylib */; };
-		78A3CE4B1DE83CDB00DB5630 /* libIL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384371DD7D09D00ACCA73 /* libIL.a */; };
-		78A3CE4C1DE83CDD00DB5630 /* libILU.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384381DD7D09D00ACCA73 /* libILU.a */; };
-		78A3CE4D1DE83CE000DB5630 /* libILUT.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 787384391DD7D09D00ACCA73 /* libILUT.a */; };
 		78A785351DE7130300156D8D /* SOIL.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785341DE7130300156D8D /* SOIL.c */; };
 		78A785371DE7134900156D8D /* image_DXT.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785361DE7134900156D8D /* image_DXT.c */; };
 		78A785391DE7134D00156D8D /* image_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785381DE7134D00156D8D /* image_helper.c */; };
@@ -43,11 +40,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		787384361DD7CFCE00ACCA73 /* DevIL_Mac */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DevIL_Mac; path = Mashgraph_Task3_OpenGL/DevIL_Mac; sourceTree = "<group>"; };
-		787384371DD7D09D00ACCA73 /* libIL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIL.a; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libIL.a; sourceTree = "<group>"; };
-		787384381DD7D09D00ACCA73 /* libILU.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libILU.a; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILU.a; sourceTree = "<group>"; };
-		787384391DD7D09D00ACCA73 /* libILUT.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libILUT.a; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILUT.a; sourceTree = "<group>"; };
-		7873843D1DD7D0D800ACCA73 /* IL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IL.h; sourceTree = "<group>"; };
 		7873843E1DD7D77200ACCA73 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = Mashgraph_Task3_OpenGL/bin/shaders; sourceTree = "<group>"; };
 		78A3CE481DE837AC00DB5630 /* libassimp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.dylib; path = "Mashgraph_Task3_OpenGL/assimp-3.3.1/lib/libassimp.dylib"; sourceTree = "<group>"; };
 		78A4487A1DD724840006C95E /* Camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
@@ -61,11 +53,7 @@
 		78A448821DD724840006C95E /* vec2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec2.h; sourceTree = "<group>"; };
 		78A448831DD724840006C95E /* vec3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec3.h; sourceTree = "<group>"; };
 		78A448841DD724840006C95E /* vec4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec4.h; sourceTree = "<group>"; };
-		78A785241DE5ADDB00156D8D /* libIL.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIL.1.dylib; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libIL.1.dylib; sourceTree = "<group>"; };
-		78A785251DE5ADDB00156D8D /* libILU.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libILU.1.dylib; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILU.1.dylib; sourceTree = "<group>"; };
-		78A785261DE5ADDB00156D8D /* libILUT.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libILUT.1.dylib; path = Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib/libILUT.1.dylib; sourceTree = "<group>"; };
 		78A7852D1DE711E400156D8D /* Simple_OpenGL_Image_Library */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Simple_OpenGL_Image_Library; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library; sourceTree = "<group>"; };
-		78A7852E1DE711F000156D8D /* libSOIL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSOIL.a; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/lib/libSOIL.a; sourceTree = "<group>"; };
 		78A785301DE712FA00156D8D /* image_DXT.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = image_DXT.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/image_DXT.c; sourceTree = "<group>"; };
 		78A785321DE712FF00156D8D /* image_helper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = image_helper.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/image_helper.c; sourceTree = "<group>"; };
 		78A785341DE7130300156D8D /* SOIL.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = SOIL.c; path = Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src/SOIL.c; sourceTree = "<group>"; };
@@ -98,9 +86,6 @@
 			files = (
 				78F04CA31DD644790059C321 /* OpenGL.framework in Frameworks */,
 				78F04CA11DD644720059C321 /* GLUT.framework in Frameworks */,
-				78A3CE4B1DE83CDB00DB5630 /* libIL.a in Frameworks */,
-				78A3CE4C1DE83CDD00DB5630 /* libILU.a in Frameworks */,
-				78A3CE4D1DE83CE000DB5630 /* libILUT.a in Frameworks */,
 				78A3CE4A1DE83C1100DB5630 /* libassimp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -122,7 +107,6 @@
 				78A448821DD724840006C95E /* vec2.h */,
 				78A448831DD724840006C95E /* vec3.h */,
 				78A448841DD724840006C95E /* vec4.h */,
-				7873843D1DD7D0D800ACCA73 /* IL.h */,
 			);
 			name = Headers;
 			path = Mashgraph_Task3_OpenGL/Utility/include;
@@ -142,7 +126,6 @@
 				78A785301DE712FA00156D8D /* image_DXT.c */,
 				7873843E1DD7D77200ACCA73 /* shaders */,
 				78A7852D1DE711E400156D8D /* Simple_OpenGL_Image_Library */,
-				787384361DD7CFCE00ACCA73 /* DevIL_Mac */,
 				78A448791DD724600006C95E /* Headers */,
 				78F04C811DD641F40059C321 /* Mashgraph_Task3_OpenGL */,
 				78F04C801DD641F40059C321 /* Products */,
@@ -181,13 +164,6 @@
 			isa = PBXGroup;
 			children = (
 				78A3CE481DE837AC00DB5630 /* libassimp.dylib */,
-				78A7852E1DE711F000156D8D /* libSOIL.a */,
-				78A785241DE5ADDB00156D8D /* libIL.1.dylib */,
-				78A785251DE5ADDB00156D8D /* libILU.1.dylib */,
-				78A785261DE5ADDB00156D8D /* libILUT.1.dylib */,
-				787384371DD7D09D00ACCA73 /* libIL.a */,
-				787384381DD7D09D00ACCA73 /* libILU.a */,
-				787384391DD7D09D00ACCA73 /* libILUT.a */,
 				78F04CA21DD644790059C321 /* OpenGL.framework */,
 				78F04CA01DD644720059C321 /* GLUT.framework */,
 			);
@@ -363,13 +339,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/lib",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/lib",
 				);
@@ -386,13 +360,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/include\"",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/src",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/DevIL_Mac/1.7.8_1/lib",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/Simple_OpenGL_Image_Library/lib",
 					"$(PROJECT_DIR)/Mashgraph_Task3_OpenGL/assimp-3.3.1/lib",
 				);

@@ -771,27 +771,20 @@ void CreateGrass() {
         longTilting[i].y = float(rand()) / RAND_MAX * (M_PI/12) + (M_PI/24);
     }
 
-    ILuint	id;
-    ilEnable(IL_FORMAT_SET);
-    ilSetInteger(IL_FORMAT_MODE,IL_RGBA);
-    ilGenImages ( 1, &id );
-    ilBindImage ( id );
-    ilLoadImage("../Texture/grass2.png");
-    int err=ilGetError();
-    if (err!=IL_NO_ERROR) {
-        cerr << "ERROR during file loading:" << iluErrorString(err) << endl;
-        exit(-1);
-    }
     glGenTextures(1, &grassTexture);
     glBindTexture(GL_TEXTURE_2D, grassTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger ( IL_IMAGE_WIDTH ), ilGetInteger ( IL_IMAGE_HEIGHT ),
-                 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    ilDeleteImages( 1, &id);
+
+    int width,height;
+    unsigned char* image;
+    image = SOIL_load_image("../Texture/grass2.png", &width, &height, 0, SOIL_LOAD_RGBA);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);                                              CHECK_GL_ERRORS
+    glGenerateMipmap(GL_TEXTURE_2D);                                              CHECK_GL_ERRORS
+    glBindTexture(GL_TEXTURE_2D, 0);                                              CHECK_GL_ERRORS
+    SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
     
     // Здесь создаём буфер
@@ -938,25 +931,17 @@ void CreateGround() {
     groundPointsCount = 2*GROUND_SIDE*GROUND_SIDE - 3*GROUND_SIDE + 2;
     GenAlt();
     GenGroundMesh();
-    ILuint	id;
-    ilGenImages ( 1, &id );
-    ilBindImage ( id );
-    ilLoadImage("../Texture/ground2.png");
-    int err=ilGetError();
-    if (err!=IL_NO_ERROR) {
-        cerr << "ERROR during file loading:" << iluErrorString(err) << endl;
-        exit(-1);
-    }
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ilGetInteger ( IL_IMAGE_WIDTH ), ilGetInteger ( IL_IMAGE_HEIGHT ),
-                 0, GL_RGB, GL_UNSIGNED_BYTE, ilGetData());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    ilDeleteImages( 1, &id);
+    int width,height;
+    unsigned char* image;
+    image = SOIL_load_image("../Texture/ground2.png", &width, &height, 0, SOIL_LOAD_RGBA);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);                                              CHECK_GL_ERRORS
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);                                              CHECK_GL_ERRORS
+    glGenerateMipmap(GL_TEXTURE_2D);                                              CHECK_GL_ERRORS
+    glBindTexture(GL_TEXTURE_2D, 0);                                              CHECK_GL_ERRORS
+    SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
     
     // Подробнее о том, как это работает читайте в функции CreateGrass
@@ -1143,7 +1128,6 @@ void CreateRoses() {
 int main(int argc, char **argv)
 {
     try {
-        IL_init();
         cout << "Start" << endl;
         InitializeGLUT(argc, argv);
         cout << "GLUT inited" << endl;

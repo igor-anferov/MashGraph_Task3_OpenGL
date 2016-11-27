@@ -42,6 +42,7 @@ void main() {
 
     points = point.xy;
     points.x += 0.5;
+    points.y = 1-points.y;
     mat4 scaleMatrix = mat4(1.0);
     scaleMatrix[0][0] = 0.012*size;
     scaleMatrix[1][1] = 0.1*size;
