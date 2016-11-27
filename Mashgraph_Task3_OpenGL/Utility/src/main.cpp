@@ -351,29 +351,28 @@ double mod(double x, double y) {
 }
 
 const uint GRASS_INSTANCES = 30000; // Количество травинок
-const uint ROSES_INSTANCES = 50; // Количество роз
-const uint GROUND_SIDE = 1000;
-const uint GRASS_SIDE = 100;
-const uint TITLE_MAP_SIDE = 50;
+const uint ROSES_INSTANCES = 50;    // Количество роз
+const uint GROUND_SIDE = 1000;      // Количество точек меша по одной стороне земли
+const uint GRASS_SIDE = 100;        // Количество точек меша по длинной стороне травинки
 
 GL::Camera camera;               // Мы предоставляем Вам реализацию камеры. В OpenGL камера - это просто 2 матрицы. Модельно-видовая матрица и матрица проекции. // ###
                                  // Задача этого класса только в том чтобы обработать ввод с клавиатуры и правильно сформировать эти матрицы.
                                  // Вы можете просто пользоваться этим классом для расчёта указанных матриц.
-VM::vec3 light_source(1,0.3,-0.35);
+
+VM::vec3 light_source(1,0.3,-0.35);  // Местоположение источника света (луна)
+
 Shader treeShader;
 Model treeModel;
-
 Shader stoneShader;
 Model stoneModel;
-
 Shader roseShader;
 Model roseModel;
 
 GLuint grassPointsCount; // Количество вершин у модели травинки
 GLuint grassShader;      // Шейдер, рисующий траву
 GLuint grassVAO;         // VAO для травы (что такое VAO почитайте в доках)
-GLuint grassRegularTiltingBuffer;    // Буфер для смещения координат травинок
-GLuint grassRandomTiltingBuffer;    // Буфер для смещения координат травинок
+GLuint grassRegularTiltingBuffer;    // Буфер для регулярного смещения координат травинок
+GLuint grassRandomTiltingBuffer;     // Буфер для случайного смещения координат травинок
 vector<VM::vec2> longTilting(GRASS_INSTANCES);
 vector<VM::vec2> grassRandomTilting(GRASS_INSTANCES); // Вектор с углами наклона травинок
 
@@ -382,18 +381,18 @@ vector<VM::vec3> grassPositions(GRASS_INSTANCES);
 vector<VM::vec3> rosesPositions(ROSES_INSTANCES);
 
 GLuint groundShader; // Шейдер для земли
-GLuint skyboxShader; // Шейдер для земли
-GLuint butterflyShader; // Шейдер для земли
+GLuint skyboxShader;
+GLuint butterflyShader;
 GLuint groundVAO; // VAO для земли
-GLuint skyboxVAO; // VAO для земли
-GLuint butterflyVAO; // VAO для земли
+GLuint skyboxVAO;
+GLuint butterflyVAO;
 GLuint texture;   // текстура земли
 GLuint grassTexture;   // текстура травы
 GLuint SkyBoxTexture;
 GLuint butterflyTexture[3];
 GLuint groundPointsCount;
 
-GLfloat altitudeMap[GROUND_SIDE][GROUND_SIDE];
+GLfloat altitudeMap[GROUND_SIDE][GROUND_SIDE]; // Карта высот
 
 // Размеры экрана
 uint screenWidth = 800;
@@ -472,7 +471,6 @@ void UpdateGrassRandomTilting() {
     // Отвязываем буфер
     glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
 }
-
 
 // Рисование травы
 void DrawGrass() {
@@ -592,12 +590,21 @@ void FinishProgram() {
 
 // Обработка события нажатия клавиши (специальные клавиши обрабатываются в функции SpecialButtons)
 void KeyboardEvents(unsigned char key, int x, int y) {
+    static int SSAA = 0;
     if (key == 27) {
         FinishProgram();
     } else if (key == 'w') {
         camera.goForward();
     } else if (key == 's') {
         camera.goBack();
+    } else if (key == 'a') {
+        if (SSAA) {
+            glDisable(GL_MULTISAMPLE);
+            SSAA = 0;
+        } else {
+            glEnable(GL_MULTISAMPLE);
+            SSAA = 1;
+        }
     } else if (key == 'm') {
         captureMouse = !captureMouse;
         if (captureMouse) {
@@ -658,6 +665,7 @@ void InitializeGLUT(int argc, char **argv) {
 #ifdef __APPLE__
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE | GLUT_3_2_CORE_PROFILE);
 #else
+    glutSetOption(GLUT_MULTISAMPLE, 8);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
 #endif
 #ifndef __APPLE__
@@ -693,14 +701,14 @@ void GenerateGrassPositions(vector<VM::vec3> & grassPositions) {
     }
 }
 
-// Генерация матриц поворота травинок вокруг своей оси
+// Генерация углов поворота травинок вокруг своей оси
 void GenerateGrassRotations() {
     for (uint i = 0; i < GRASS_INSTANCES; ++i) {
         grassRotations[i] = rand()/float(RAND_MAX)*2*M_PI;
     }
 }
 
-// Здесь вам нужно будет генерировать меш
+// Генерация меша
 vector<VM::vec4> GenMesh(uint n) {
     vector<VM::vec4> mesh;
     for (int i=0; i<GRASS_SIDE; i++) {
@@ -726,7 +734,7 @@ void GenAlt(void) {
     
 }
 
-// Заполнение карты высот
+// Генерация размера травинок
 #define SIN_COUNT 10
 vector<GLfloat> GenSize(void) {
     std::default_random_engine generator;
@@ -785,7 +793,6 @@ void CreateGrass() {
     glGenerateMipmap(GL_TEXTURE_2D);                                              CHECK_GL_ERRORS
     glBindTexture(GL_TEXTURE_2D, 0);                                              CHECK_GL_ERRORS
     SOIL_free_image_data(image);
-    glBindTexture(GL_TEXTURE_2D, 0);
     
     // Здесь создаём буфер
     GLuint pointsBuffer;
@@ -862,7 +869,7 @@ void CreateGrass() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);                                            CHECK_GL_ERRORS
 }
 
-// Создаём камеру (Если шаблонная камера вам не нравится, то можете переделать, но я бы не стал)
+// Создаём камеру
 void CreateCamera() {
     camera.angle = 45.0f / 180.0f * M_PI;
     camera.direction = VM::vec3(-0.775125861, 0.011804048, -0.631696522);
@@ -944,8 +951,6 @@ void CreateGround() {
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
     
-    // Подробнее о том, как это работает читайте в функции CreateGrass
-
     groundShader = GL::CompileShaderProgram("ground");
 
     GLuint pointsBuffer;
@@ -1031,7 +1036,10 @@ void CreateButterfly() {
 
     /* ---------------------------- BUTTERFLY TEXTURE ---------------------------- */
     glGenTextures(3, butterflyTexture);                                              CHECK_GL_ERRORS
-    vector<string> ind = {"1","2","3"};
+    vector<string> ind;
+    ind.push_back("1");
+    ind.push_back("2");
+    ind.push_back("3");
     glUseProgram(butterflyShader);
     for (int i=0; i<3; i++) {
         GLuint textLocation = glGetUniformLocation(butterflyShader, (string("text")+ind[i]).c_str());                                           CHECK_GL_ERRORS
@@ -1060,9 +1068,9 @@ void CreateButterfly() {
     /* ---------------------------- BUTTERFLY VERTICES ---------------------------- */
     GLfloat vertices[] = {-1,0,-1,1,0,0,0,1,1,0,1,1};
     GLfloat rads[] = {0.8, 0.4, 0.5};
-    GLfloat center[] = { 0,  0.1,   0,
-                         0.5,  0.15,  0.5,
-                         -0.4,  0.125, -0.4 };
+    GLfloat center[] = { 0,    0.1,    0,
+                         0.5,  0.15,   0.5,
+                        -0.4,  0.125, -0.4 };
     
     glGenVertexArrays(1, &butterflyVAO);                                            CHECK_GL_ERRORS
     glBindVertexArray(butterflyVAO);                                                CHECK_GL_ERRORS
@@ -1132,14 +1140,14 @@ int main(int argc, char **argv)
         InitializeGLUT(argc, argv);
         cout << "GLUT inited" << endl;
 #ifndef __APPLE__
+        glewExperimental = GL_TRUE;
         glewInit();
         cout << "glew inited" << endl;
 #endif
-        glEnable(GL_MULTISAMPLE);
-        CreateSkyBox();
-        cout << "SkyBox created" << endl;
         CreateCamera();
         cout << "Camera created" << endl;
+        CreateSkyBox();
+        cout << "SkyBox created" << endl;
         CreateGround();
         cout << "Ground created" << endl;
         CreateGrass();
@@ -1155,7 +1163,7 @@ int main(int argc, char **argv)
         CreateRoses();
         cout << "Roses created" << endl;
         CreateButterfly();
-        cout << "Butterfly created" << endl;
+        cout << "Butterflies created" << endl;
         
         glutMainLoop();
     } catch (string s) {

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		78A3CE4A1DE83C1100DB5630 /* libassimp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A3CE481DE837AC00DB5630 /* libassimp.dylib */; };
+		787A2ECA1DEB2F4500ADCF50 /* libassimp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 787A2EC91DEB2F4500ADCF50 /* libassimp.dylib */; };
 		78A785351DE7130300156D8D /* SOIL.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785341DE7130300156D8D /* SOIL.c */; };
 		78A785371DE7134900156D8D /* image_DXT.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785361DE7134900156D8D /* image_DXT.c */; };
 		78A785391DE7134D00156D8D /* image_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = 78A785381DE7134D00156D8D /* image_helper.c */; };
@@ -41,7 +41,7 @@
 
 /* Begin PBXFileReference section */
 		7873843E1DD7D77200ACCA73 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = Mashgraph_Task3_OpenGL/bin/shaders; sourceTree = "<group>"; };
-		78A3CE481DE837AC00DB5630 /* libassimp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.dylib; path = "Mashgraph_Task3_OpenGL/assimp-3.3.1/lib/libassimp.dylib"; sourceTree = "<group>"; };
+		787A2EC91DEB2F4500ADCF50 /* libassimp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.dylib; path = "Mashgraph_Task3_OpenGL/assimp-3.3.1/lib/libassimp.dylib"; sourceTree = "<group>"; };
 		78A4487A1DD724840006C95E /* Camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
 		78A4487B1DD724840006C95E /* GL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GL.h; sourceTree = "<group>"; };
 		78A4487C1DD724840006C95E /* mat4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mat4.h; sourceTree = "<group>"; };
@@ -86,7 +86,7 @@
 			files = (
 				78F04CA31DD644790059C321 /* OpenGL.framework in Frameworks */,
 				78F04CA11DD644720059C321 /* GLUT.framework in Frameworks */,
-				78A3CE4A1DE83C1100DB5630 /* libassimp.dylib in Frameworks */,
+				787A2ECA1DEB2F4500ADCF50 /* libassimp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -163,7 +163,7 @@
 		78F04C9F1DD644710059C321 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				78A3CE481DE837AC00DB5630 /* libassimp.dylib */,
+				787A2EC91DEB2F4500ADCF50 /* libassimp.dylib */,
 				78F04CA21DD644790059C321 /* OpenGL.framework */,
 				78F04CA01DD644720059C321 /* GLUT.framework */,
 			);
@@ -351,6 +351,7 @@
 					"-openmp",
 					"$(OTHER_CFLAGS)",
 				);
+				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = build;
 			};
@@ -372,6 +373,7 @@
 					"-openmp",
 					"$(OTHER_CFLAGS)",
 				);
+				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = build;
 			};

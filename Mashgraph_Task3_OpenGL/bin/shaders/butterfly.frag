@@ -34,7 +34,7 @@ void main() {
                 outColor = texture(text3, points);
             else
                 outColor = vec4(1);
-    if(outColor.a < 0.8)
+    if(outColor.a < 0.9)
         discard;
     outColor *= light.x;
 }

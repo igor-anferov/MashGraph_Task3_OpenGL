@@ -22,7 +22,7 @@ void main() {
     vec3 light = ambient_light + diffuse_light + specular_light;
     
     outColor = texture(ourTexture, points);
-    if(outColor.a < 0.8)
+    if(outColor.a < 0.9)
         discard;
     outColor *= vec4(light,1) * max(0,point_world.y*10);
 }

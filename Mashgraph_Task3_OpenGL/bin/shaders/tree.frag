@@ -24,7 +24,7 @@ void main() {
     vec3 light = ambient_light + diffuse_light + specular_light;
     
     color = vec4(texture(texture_diffuse1, TexCoords));
-    if (color.a < 0.8) {
+    if (color.a < 0.9) {
         discard;
     }
     color *= vec4(light,1);
