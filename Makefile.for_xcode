@@ -1,0 +1,12 @@
+CXX = g++
+ASSIMP = Mashgraph_Task3_OpenGL/assimp-3.3.1
+
+all: $(ASSIMP)/bin/unit
+$(ASSIMP)/bin/unit: Mashgraph_Task3_OpenGL/assimp-3.3.1.tar.gz
+	cd Mashgraph_Task3_OpenGL; \
+	tar -zxvf assimp-3.3.1.tar.gz; \
+	cd ..
+	cd $(ASSIMP); \
+	cmake CMakeLists.txt -G 'Unix Makefiles'; \
+	make; \
+	cd ../..
